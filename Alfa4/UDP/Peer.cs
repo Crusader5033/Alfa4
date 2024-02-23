@@ -7,8 +7,8 @@ internal class Peer
     private string peerId;
     private int discoveryPort;
     private int discoveryIntervalSeconds;
-    private readonly UdpClient udpClient;
-    private readonly UdpListener udpListener;
+    private  UdpClient udpClient;
+    private  UdpListener udpListener;
 
     public Peer(string id, int port, int intervalSeconds)
     {
