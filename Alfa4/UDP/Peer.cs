@@ -1,74 +1,78 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
-internal class Peer
+namespace Alfa4.UDP
 {
-    private string peerId;
-    private int discoveryPort;
-    private int discoveryIntervalSeconds;
-    private  UdpClient udpClient;
-    private  UdpListener udpListener;
-
-    public Peer(string id, int port, int intervalSeconds)
+    internal class Peer
     {
-        this.peerId = id;
-        this.discoveryPort = port;
-        this.discoveryIntervalSeconds = intervalSeconds;
-        this.udpClient = new UdpClient();
-        udpClient.EnableBroadcast = true;
-        udpListener = new UdpListener(discoveryPort);
-        udpListener.MessageReceived += HandleDiscoveryResponse;
-    }
+        private readonly string peerId;
+        private readonly UdpClient udpClient;
+        private readonly UdpListener udpListener;
 
-    public void StartDiscovery()
-    {
-        Thread discoveryThread = new Thread(DiscoverPeers);
-        discoveryThread.Start();
-    }
 
-    private void DiscoverPeers()
-    {
-        try
+        public Peer(string id)
         {
-            while (true)
+            peerId = id;
+            udpClient = new UdpClient();
+            udpClient.EnableBroadcast = true;
+            udpListener = new UdpListener();
+            udpListener.MessageReceived += HandleDiscoveryResponse;
+        }
+
+        public void StartDiscovery()
+        {
+            Thread discoveryThread = new Thread(DiscoverPeers);
+            discoveryThread.Start();
+        }
+
+        private void DiscoverPeers()
+        {
+            try
             {
-                SendDiscoveryRequest();
-                Thread.Sleep(this.discoveryIntervalSeconds * 1000);
+                while (true)
+                {
+                    SendDiscoveryRequest();
+                    Thread.Sleep(5 * 1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred during discovery: " + ex.Message);
             }
         }
-        catch (Exception ex)
+
+        private void SendDiscoveryRequest()
         {
-            Console.WriteLine("Error occurred during discovery: " + ex.Message);
+            try
+            {
+                string message = $"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}";
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                udpClient.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, 9876));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred while sending discovery request: " + ex.Message);
+            }
         }
-    }
 
-    private void SendDiscoveryRequest()
-    {
-        try
+        private void HandleDiscoveryResponse(string message, IPEndPoint remoteEP)
         {
-            string message = $"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}";
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            this.udpClient.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, this.discoveryPort));
+            Console.WriteLine($"Received response from {remoteEP}: {message}");
         }
-        catch (Exception ex)
+
+        public void StartListening()
         {
-            Console.WriteLine("Error occurred while sending discovery request: " + ex.Message);
+            udpListener.StartListening();
         }
-    }
 
-    private void HandleDiscoveryResponse(string message, IPEndPoint remoteEP)
-    {
-        Console.WriteLine($"Received response from {remoteEP}: {message}");
-    }
-
-    public void StartListening()
-    {
-        this.udpListener.StartListening();
-    }
-
-    public void Stop()
-    {
-        this.udpListener.Close();
+        public void Stop()
+        {
+            udpListener.Close();
+        }
     }
 }
