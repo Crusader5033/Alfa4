@@ -1,14 +1,14 @@
-﻿using Alfa4.UDP;
-
-namespace Alfa4
+﻿namespace Alfa4
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            string peerId = "dom"; // Změňte podle potřeby
+            string configFile = "conf\\App.config"; // Změňte podle potřeby
+            PeerSettings settings = PeerSettings.LoadFromFile(configFile);
 
-            Peer peer = new Peer(peerId);
+            // Vytvoření instance peeru s načtenými nastaveními
+            Peer peer = new Peer(settings.PeerId, settings.DiscoveryPort, settings.DiscoveryIntervalSeconds);
             peer.StartDiscovery();
             peer.StartListening();
 
