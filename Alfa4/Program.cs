@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            string configFile = "conf\\App.config"; // Změňte podle potřeby
+            string configFile = "App.config"; // Změňte podle potřeby
             PeerSettings settings = PeerSettings.LoadFromFile(configFile);
 
             // Vytvoření instance peeru s načtenými nastaveními

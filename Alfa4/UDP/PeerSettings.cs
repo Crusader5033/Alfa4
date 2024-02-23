@@ -22,6 +22,7 @@ public class PeerSettings
         catch (Exception ex)
         {
             Console.WriteLine("Error loading peer settings: " + ex.Message);
+           
         }
         return settings;
     }

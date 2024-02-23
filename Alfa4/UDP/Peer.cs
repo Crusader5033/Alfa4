@@ -4,9 +4,9 @@ using System.Text;
 
 internal class Peer
 {
-    private readonly string peerId;
-    private readonly int discoveryPort;
-    private readonly int discoveryIntervalSeconds;
+    private string peerId;
+    private int discoveryPort;
+    private int discoveryIntervalSeconds;
     private readonly UdpClient udpClient;
     private readonly UdpListener udpListener;
 
