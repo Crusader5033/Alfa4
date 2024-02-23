@@ -12,10 +12,10 @@ internal class Peer
 
     public Peer(string id, int port, int intervalSeconds)
     {
-        peerId = id;
-        discoveryPort = port;
-        discoveryIntervalSeconds = intervalSeconds;
-        udpClient = new UdpClient();
+        this.peerId = id;
+        this.discoveryPort = port;
+        this.discoveryIntervalSeconds = intervalSeconds;
+        this.udpClient = new UdpClient();
         udpClient.EnableBroadcast = true;
         udpListener = new UdpListener(discoveryPort);
         udpListener.MessageReceived += HandleDiscoveryResponse;
@@ -34,7 +34,7 @@ internal class Peer
             while (true)
             {
                 SendDiscoveryRequest();
-                Thread.Sleep(discoveryIntervalSeconds * 1000);
+                Thread.Sleep(this.discoveryIntervalSeconds * 1000);
             }
         }
         catch (Exception ex)
@@ -49,7 +49,7 @@ internal class Peer
         {
             string message = $"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}";
             byte[] data = Encoding.UTF8.GetBytes(message);
-            udpClient.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, discoveryPort));
+            this.udpClient.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, this.discoveryPort));
         }
         catch (Exception ex)
         {
@@ -64,11 +64,11 @@ internal class Peer
 
     public void StartListening()
     {
-        udpListener.StartListening();
+        this.udpListener.StartListening();
     }
 
     public void Stop()
     {
-        udpListener.Close();
+        this.udpListener.Close();
     }
 }

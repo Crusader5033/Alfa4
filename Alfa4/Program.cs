@@ -6,13 +6,12 @@
         {
             string configFile = "App.config"; // Změňte podle potřeby
             PeerSettings settings = PeerSettings.LoadFromFile(configFile);
-
-            // Vytvoření instance peeru s načtenými nastaveními
             Peer peer = new Peer(settings.PeerId, settings.DiscoveryPort, settings.DiscoveryIntervalSeconds);
             peer.StartDiscovery();
             peer.StartListening();
 
-            
+            Console.WriteLine("Press any key to stop...");
+            Console.ReadKey();
 
             // Zastavit vlákno a uvolnit zdroje
             peer.Stop();

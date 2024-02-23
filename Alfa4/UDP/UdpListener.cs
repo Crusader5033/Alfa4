@@ -2,9 +2,9 @@
 using System.Net;
 using System.Text;
 
-internal class UdpListener
+public class UdpListener
 {
-    private readonly UdpClient udpClient;
+    private  UdpClient udpClient;
 
     public event Action<string, IPEndPoint> MessageReceived;
 
