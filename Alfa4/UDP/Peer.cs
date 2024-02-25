@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Net.Sockets;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 internal class Peer
 {
@@ -14,6 +11,7 @@ internal class Peer
     private readonly UdpListener udpListener;
     private readonly Dictionary<string, TcpConnection> tcpConnections;
     private readonly TcpListener tcpListener;
+    private readonly Dictionary<string, Dictionary<string, string>> messageHistory;
 
     public Peer(string id, int discoveryPort, int discoveryIntervalSeconds, int tcpPort)
     {
@@ -27,6 +25,7 @@ internal class Peer
         tcpConnections = new Dictionary<string, TcpConnection>();
         tcpListener = new TcpListener(IPAddress.Any, tcpPort);
         tcpListener.Start();
+        messageHistory = new Dictionary<string, Dictionary<string, string>>();
         StartListeningForMessages();
     }
 
@@ -62,6 +61,31 @@ internal class Peer
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
             string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
             Console.WriteLine($"Received TCP message: {message}");
+
+            // Parse the incoming TCP message
+            var parsedMessage = ParseJsonMessage(message);
+            if (parsedMessage.ContainsKey("status") && parsedMessage["status"].ToString() == "ok")
+            {
+                if (parsedMessage.ContainsKey("messages"))
+                {
+                    var messages = parsedMessage["messages"] as Dictionary<string, object>;
+                    foreach (var kvp in messages)
+                    {
+                        string messageId = kvp.Key;
+                        var messageData = kvp.Value as Dictionary<string, object>;
+                        string peerId = messageData["peer_id"].ToString();
+                        string msg = messageData["message"].ToString();
+
+                        // Store message in history
+                        if (!messageHistory.ContainsKey(peerId))
+                        {
+                            messageHistory[peerId] = new Dictionary<string, string>();
+                        }
+                        messageHistory[peerId][messageId] = msg;
+                    }
+                }
+            }
+            
         }
         catch (Exception ex)
         {
@@ -72,10 +96,12 @@ internal class Peer
             tcpClient.Close();
         }
     }
+
     public void StartListening()
     {
         udpListener.StartListening();
     }
+
     public void StartDiscovery()
     {
         Thread discoveryThread = new Thread(DiscoverPeers);
@@ -116,18 +142,10 @@ internal class Peer
     {
         Console.WriteLine($"Received response from {remoteEP}: {message}");
 
-        // Parse the response message
-        var response = ParseJsonMessage(message);
-        if (response.ContainsKey("messages"))
-        {
-            // Extract messages from response
-            var messages = response["messages"] as Dictionary<string, object>;
-            // Handle handshake
-            HandleHandshake(messages, remoteEP);
-        }
+        HandleHandshake(remoteEP);
     }
 
-    private void HandleHandshake(Dictionary<string, object> messages, IPEndPoint remoteEP)
+    private void HandleHandshake(IPEndPoint remoteEP)
     {
         if (!tcpConnections.ContainsKey(remoteEP.Address.ToString()))
         {
@@ -136,56 +154,45 @@ internal class Peer
             tcpConnection.Connect();
             tcpConnections.Add(remoteEP.Address.ToString(), tcpConnection);
 
-            // Send handshake message
+            // Send hello message
             tcpConnection.SendMessage($"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}");
-
-            // Prepare and send peer's chat history
-            string historyResponse = PrepareHistoryResponse(messages);
-            tcpConnection.SendMessage(historyResponse);
+            Console.WriteLine($"TCP connection established with peer at {remoteEP.Address}:{tcpConnection.Port}");
         }
     }
 
-    private string PrepareHistoryResponse(Dictionary<string, object> receivedMessages)
+    private string PrepareHistoryResponse()
     {
         // Construct history response message
         StringBuilder historyBuilder = new StringBuilder();
         historyBuilder.Append("{\"status\":\"ok\",\"messages\":{");
 
-        // Add messages sent by this peer
-        // For demonstration purposes, let's assume we have a list of sent messages
-        List<string> sentMessages = new List<string>() { "First message", "Second message", "Third message" };
-        foreach (var sentMessage in sentMessages)
+        foreach (var peerMessages in messageHistory)
         {
-            string messageId = GenerateMessageId(); // You should implement this method to generate a unique message ID
-            historyBuilder.Append($"\"{messageId}\":{{\"peer_id\":\"{peerId}\",\"message\":\"{sentMessage}\"}},");
-        }
-
-        // Add received messages from other peers
-        foreach (var receivedMessage in receivedMessages)
-        {
-            historyBuilder.Append($"\"{receivedMessage.Key}\":{{\"peer_id\":\"{receivedMessage.Value}\",\"message\":\"{receivedMessage.Key}\"}},");
+            foreach (var kvp in peerMessages.Value)
+            {
+                string messageId = kvp.Key;
+                string msg = kvp.Value;
+                historyBuilder.Append($"\"{messageId}\":{{\"peer_id\":\"{peerMessages.Key}\",\"message\":\"{msg}\"}},");
+            }
         }
 
         // Remove the last comma
-        historyBuilder.Remove(historyBuilder.Length - 1, 1);
+        if (messageHistory.Count > 0)
+        {
+            historyBuilder.Remove(historyBuilder.Length - 1, 1);
+        }
 
-        // Close the messages object
         historyBuilder.Append("}}");
 
         return historyBuilder.ToString();
     }
 
-    private string GenerateMessageId()
+    private Dictionary<string, object> ParseJsonMessage(string message)
     {
-        DateTime currentTime = DateTime.UtcNow;
-
-        // Výpočet počtu milisekund od roku 1970 (Unix Epoch)
-        long millisecondsSinceEpoch = (long)(currentTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-
-        // Převod na řetězec a vrácení výsledného čísla
-        return millisecondsSinceEpoch.ToString();
+        // Here you would parse the JSON message into a dictionary
+        // For now, let's just return an empty dictionary
+        return new Dictionary<string, object>();
     }
-
 
     public void Stop()
     {
@@ -195,12 +202,5 @@ internal class Peer
         }
         udpListener.Close();
         tcpListener.Stop();
-    }
-
-    private Dictionary<string, object> ParseJsonMessage(string message)
-    {
-        // Here you would parse the JSON message into a dictionary
-        // For now, let's just return an empty dictionary
-        return new Dictionary<string, object>();
     }
 }

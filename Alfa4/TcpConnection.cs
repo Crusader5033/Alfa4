@@ -12,6 +12,8 @@ internal class TcpConnection
     private bool isConnected = false;
     private Thread receiveThread;
 
+    public int Port { get => port; set => port = value; }
+
     public TcpConnection(string ipAddress, int port)
     {
         this.ipAddress = ipAddress;
