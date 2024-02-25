@@ -2,7 +2,7 @@
 
 ## Overview
 
-This documentation provides an overview of a peer communication program developed in C#. The program allows peers to communicate with each other over TCP and UDP protocols. It enables discovery of other peers in the network, sending and receiving messages, and maintaining a message history.
+This documentation provides an overview of a peer communication program developed in C#. The program allows peers to communicate with each other over TCP and UDP protocols. It enables discovery of other peers in the network.
 ![Bez názvu](https://github.com/Crusader5033/Alfa4/assets/113086006/1a0b4b1d-cce0-4586-96f9-0d282564770b)
 
 ## Program Components
@@ -98,4 +98,5 @@ UDP onlyt(not useable now)
 
 ## Conclusion
 
-The peer communication program provides a framework for building peer-to-peer applications. It allows seamless communication between peers over TCP and UDP protocols, facilitating message exchange and discovery in a networked environment.
+In theory the peer communication program provides a framework for building peer-to-peer applications. It allows seamless communication between peers over TCP and UDP protocols, facilitating message exchange and discovery in a networked environment.
+Unfortunately much of the features and functions are WIP or not working.
