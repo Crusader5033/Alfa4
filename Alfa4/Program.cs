@@ -4,16 +4,24 @@
     {
         static void Main(string[] args)
         {
-            string configFile = "App.config"; // Změňte podle potřeby
-            PeerSettings settings = PeerSettings.LoadFromFile(configFile);
-            Peer peer = new Peer(settings.PeerId, settings.DiscoveryPort, settings.DiscoveryIntervalSeconds);
+            // Získání konfiguračních nastavení
+            PeerSettings settings = PeerSettings.LoadFromFile("App.config");
+
+            // Vytvoření instance peeru s použitím konfiguračních nastavení
+            Peer peer = new Peer(settings.PeerId, settings.DiscoveryPort, settings.DiscoveryIntervalSeconds, settings.DiscoveryPort);
+
+            // Spuštění metody pro objevování peerů v síti
             peer.StartDiscovery();
             peer.StartListening();
 
+            // Spuštění naslouchání na TCP portu pro přijímání zpráv od ostatních peerů
+            peer.StartListeningForMessages();
+
+            // Necháme konzoli běžet, dokud nepřijde stisk klávesy
             Console.WriteLine("Press any key to stop...");
             Console.ReadKey();
 
-            // Zastavit vlákno a uvolnit zdroje
+            // Ukončení spojení a činnosti peeru
             peer.Stop();
         }
     }

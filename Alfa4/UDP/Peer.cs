@@ -1,7 +1,9 @@
-﻿using Alfa4;
-using System.Net.Sockets;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 internal class Peer
 {
@@ -11,19 +13,69 @@ internal class Peer
     private readonly UdpClient udpClient;
     private readonly UdpListener udpListener;
     private readonly Dictionary<string, TcpConnection> tcpConnections;
+    private readonly TcpListener tcpListener;
 
-    public Peer(string id, int port, int intervalSeconds)
+    public Peer(string id, int discoveryPort, int discoveryIntervalSeconds, int tcpPort)
     {
         peerId = id;
-        discoveryPort = port;
-        discoveryIntervalSeconds = intervalSeconds;
+        this.discoveryPort = discoveryPort;
+        this.discoveryIntervalSeconds = discoveryIntervalSeconds;
         udpClient = new UdpClient();
         udpClient.EnableBroadcast = true;
         udpListener = new UdpListener(discoveryPort);
         udpListener.MessageReceived += HandleDiscoveryResponse;
         tcpConnections = new Dictionary<string, TcpConnection>();
+        tcpListener = new TcpListener(IPAddress.Any, tcpPort);
+        tcpListener.Start();
+        StartListeningForMessages();
     }
 
+    public void StartListeningForMessages()
+    {
+        Thread tcpListenerThread = new Thread(ListenForMessages);
+        tcpListenerThread.Start();
+    }
+
+    public void ListenForMessages()
+    {
+        try
+        {
+            while (true)
+            {
+                TcpClient client = tcpListener.AcceptTcpClient();
+                ThreadPool.QueueUserWorkItem(HandleIncomingMessage, client);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error occurred while listening for TCP messages: " + ex.Message);
+        }
+    }
+
+    public void HandleIncomingMessage(object client)
+    {
+        TcpClient tcpClient = (TcpClient)client;
+        try
+        {
+            NetworkStream stream = tcpClient.GetStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead = stream.Read(buffer, 0, buffer.Length);
+            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            Console.WriteLine($"Received TCP message: {message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error occurred while handling incoming TCP message: " + ex.Message);
+        }
+        finally
+        {
+            tcpClient.Close();
+        }
+    }
+    public void StartListening()
+    {
+        udpListener.StartListening();
+    }
     public void StartDiscovery()
     {
         Thread discoveryThread = new Thread(DiscoverPeers);
@@ -80,7 +132,7 @@ internal class Peer
         if (!tcpConnections.ContainsKey(remoteEP.Address.ToString()))
         {
             // Connect to the peer over TCP
-            TcpConnection tcpConnection = new TcpConnection(remoteEP.Address.ToString());
+            TcpConnection tcpConnection = new TcpConnection(remoteEP.Address.ToString(), 9876);
             tcpConnection.Connect();
             tcpConnections.Add(remoteEP.Address.ToString(), tcpConnection);
 
@@ -106,11 +158,6 @@ internal class Peer
         return new Dictionary<string, object>();
     }
 
-    public void StartListening()
-    {
-        udpListener.StartListening();
-    }
-
     public void Stop()
     {
         foreach (var connection in tcpConnections.Values)
@@ -118,5 +165,6 @@ internal class Peer
             connection.Disconnect();
         }
         udpListener.Close();
+        tcpListener.Stop();
     }
 }

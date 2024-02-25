@@ -6,10 +6,12 @@ internal class TcpConnection
     private TcpClient tcpClient;
     private NetworkStream stream;
     private string ipAddress;
+    private int port;
 
-    public TcpConnection(string ipAddress)
+    public TcpConnection(string ipAddress, int port)
     {
         this.ipAddress = ipAddress;
+        this.port = port;
         tcpClient = new TcpClient();
     }
 
@@ -17,7 +19,7 @@ internal class TcpConnection
     {
         try
         {
-            tcpClient.Connect(ipAddress, 9876);
+            tcpClient.Connect(ipAddress, port);
             stream = tcpClient.GetStream();
         }
         catch (Exception ex)
