@@ -115,9 +115,19 @@ internal class Peer
     private void HandleDiscoveryResponse(string message, IPEndPoint remoteEP)
     {
         Console.WriteLine($"Received response from {remoteEP}: {message}");
+
+        // Parse the response message
+        var response = ParseJsonMessage(message);
+        if (response.ContainsKey("messages"))
+        {
+            // Extract messages from response
+            var messages = response["messages"] as Dictionary<string, object>;
+            // Handle handshake
+            HandleHandshake(messages, remoteEP);
+        }
     }
 
-    public void HandleHandshake(Dictionary<string, object> messages, IPEndPoint remoteEP)
+    private void HandleHandshake(Dictionary<string, object> messages, IPEndPoint remoteEP)
     {
         if (!tcpConnections.ContainsKey(remoteEP.Address.ToString()))
         {
@@ -135,7 +145,7 @@ internal class Peer
         }
     }
 
-    public string PrepareHistoryResponse(Dictionary<string, object> receivedMessages)
+    private string PrepareHistoryResponse(Dictionary<string, object> receivedMessages)
     {
         // Construct history response message
         StringBuilder historyBuilder = new StringBuilder();
@@ -167,10 +177,13 @@ internal class Peer
 
     private string GenerateMessageId()
     {
-        DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        TimeSpan timeSinceEpoch = DateTime.UtcNow - epochStart;
-        long milliseconds = (long)timeSinceEpoch.TotalMilliseconds;
-        return milliseconds.ToString();
+        DateTime currentTime = DateTime.UtcNow;
+
+        // Výpočet počtu milisekund od roku 1970 (Unix Epoch)
+        long millisecondsSinceEpoch = (long)(currentTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+
+        // Převod na řetězec a vrácení výsledného čísla
+        return millisecondsSinceEpoch.ToString();
     }
 
 
@@ -182,5 +195,12 @@ internal class Peer
         }
         udpListener.Close();
         tcpListener.Stop();
+    }
+
+    private Dictionary<string, object> ParseJsonMessage(string message)
+    {
+        // Here you would parse the JSON message into a dictionary
+        // For now, let's just return an empty dictionary
+        return new Dictionary<string, object>();
     }
 }
