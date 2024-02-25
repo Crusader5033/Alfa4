@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "dcJLhfXzZfBW2A0Vmf6DG9wUaXABfl7KfCtTW8Rbf+yfN0xngYW9TVFUjUvTlsE+Ak8yspEfbswxI3F4ByQ/yQ==",
+  "dgSpecHash": "u1sLebBLkKLytUQbnRohJw1AjREMZPkbxr131TFW3lfE0+S59iKx0yqkMKZ/CXdyWMiXuOcVuuqGDNLddmuL8Q==",
   "success": true,
   "projectFilePath": "C:\\Users\\Dominik Procházka\\Documents\\Alfa4\\Alfa4.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Dominik Procházka\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

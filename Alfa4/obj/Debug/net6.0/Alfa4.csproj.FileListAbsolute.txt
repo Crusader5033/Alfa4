@@ -13,3 +13,5 @@ C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\refint\Alfa4.dll
 C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\Alfa4.pdb
 C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\Alfa4.genruntimeconfig.cache
 C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\ref\Alfa4.dll
+C:\Users\Dominik Procházka\Documents\Alfa4\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\Alfa4.csproj.CopyComplete

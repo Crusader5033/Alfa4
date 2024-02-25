@@ -1,6 +1,9 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using Newtonsoft.Json;
+
 
 internal class Peer
 {
@@ -147,26 +150,34 @@ internal class Peer
     {
         Console.WriteLine($"Received response from {remoteEP}: {message}");
 
-        HandleHandshake(remoteEP);
-    }
+        // Parse the response message
+        var response = ParseJsonMessage(message);
 
-    private void HandleHandshake(IPEndPoint remoteEP)
+        // Check if the response contains the expected fields
+        if (response.ContainsKey("peer_id"))
+        {
+            string peerId = response["peer_id"].ToString();
+
+            // Handle handshake with the peer
+            HandleHandshake(peerId, remoteEP);
+        }
+    }
+    private void HandleHandshake(string peerId, IPEndPoint remoteEP)
     {
-        if (!tcpConnections.ContainsKey(remoteEP.Address.ToString()))
+        // Check if the TCP connection is already established with the peer
+        if (!tcpConnections.ContainsKey(peerId))
         {
             // Connect to the peer over TCP
             TcpConnection tcpConnection = new TcpConnection(remoteEP.Address.ToString(), 9876);
             tcpConnection.Connect();
-            tcpConnections.Add(remoteEP.Address.ToString(), tcpConnection);
+            tcpConnections.Add(peerId, tcpConnection);
 
             // Send hello message
             tcpConnection.SendMessage($"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}");
 
-            // Prepare and send peer's chat history
-            string historyResponse = PrepareHistoryResponse();
-            tcpConnection.SendMessage(historyResponse);
+          
 
-            Console.WriteLine($"TCP connection established with peer at {remoteEP.Address}:{tcpConnection.Port}");
+            Console.WriteLine($"TCP connection established with peer {peerId} at {remoteEP.Address}:{tcpConnection.Port}");
         }
     }
 
@@ -199,9 +210,18 @@ internal class Peer
 
     private Dictionary<string, object> ParseJsonMessage(string message)
     {
-        // Here you would parse the JSON message into a dictionary
-        // For now, let's just return an empty dictionary
-        return new Dictionary<string, object>();
+        try
+        {
+            // Parse the JSON message into a dictionary
+            var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+            return dictionary;
+        }
+        catch (Newtonsoft.Json.JsonException ex)
+        {
+            // Handle JSON parsing errors
+            Console.WriteLine($"Error parsing JSON message: {ex.Message}");
+            return new Dictionary<string, object>();
+        }
     }
 
     public void Stop()
