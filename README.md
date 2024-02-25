@@ -77,6 +77,8 @@ To use the program:
 ## Configuration
 You can configura the connection in App.config located in Alfa4/bin/Debug/net6.0
 Here is deafult config:
+
+##
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
 	<peerSettings>
