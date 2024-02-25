@@ -73,6 +73,19 @@ To use the program:
 2. Start the peer by calling `StartDiscovery()` and `StartListening()` methods.
 3. Communicate with other peers using TCP and UDP protocols.
 4. Handle incoming messages and manage message history.
+
+## Configuration
+You can configura the connection in App.config located in Alfa4/bin/Debug/net6.0
+Here is deafult config:
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<peerSettings>
+		<peerId>PlantationOwner</peerId>
+		<discoveryPort>9876</discoveryPort>
+		<discoveryIntervalSeconds>5</discoveryIntervalSeconds>
+	</peerSettings>
+</configuration>
+
    
 ## Issues
 Only UDP and TCP connection works. Theres some problems with inconsistency so its ideal to run program more than once. 
@@ -83,7 +96,7 @@ Only UDP and TCP connection works. Theres some problems with inconsistency so it
 Succesfull UDP discovery and succesfull TCP connection,sometimes i even get response with message history.
 ![Výstřižekě](https://github.com/Crusader5033/Alfa4/assets/113086006/d241f1f2-272b-499a-960e-533618c8329e)
 
-Samotne UDP(jiz neni k dispozici)
+UDP onlyt(not useable now)
 ![Samotne UDP](https://github.com/Crusader5033/Alfa4/assets/113086006/b1b8a674-d86d-4777-911e-19e90dfa6242)
 
 
