@@ -15,3 +15,4 @@ C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\Alfa4.genruntimecon
 C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\ref\Alfa4.dll
 C:\Users\Dominik Procházka\Documents\Alfa4\bin\Debug\net6.0\Newtonsoft.Json.dll
 C:\Users\Dominik Procházka\Documents\Alfa4\obj\Debug\net6.0\Alfa4.csproj.CopyComplete
+C:\Users\Dominik Procházka\Documents\Alfa4\bin\Debug\net6.0\xunit.assert.dll

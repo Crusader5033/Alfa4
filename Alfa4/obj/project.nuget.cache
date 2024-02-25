@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "u1sLebBLkKLytUQbnRohJw1AjREMZPkbxr131TFW3lfE0+S59iKx0yqkMKZ/CXdyWMiXuOcVuuqGDNLddmuL8Q==",
+  "dgSpecHash": "jvVVF/RrcKWDQeKEThb7tX4kZddcP0pJCv+wDFqd8dbyA9Ar295FjwpHph3wrnaNDr8p0ji3/w8NvWqR+5kI6w==",
   "success": true,
   "projectFilePath": "C:\\Users\\Dominik Procházka\\Documents\\Alfa4\\Alfa4.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Dominik Procházka\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\Dominik Procházka\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\Dominik Procházka\\.nuget\\packages\\xunit.assert\\2.7.0\\xunit.assert.2.7.0.nupkg.sha512"
   ],
   "logs": []
 }

@@ -14,6 +14,19 @@
             "related": ".xml"
           }
         }
+      },
+      "xunit.assert/2.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/xunit.assert.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/xunit.assert.dll": {
+            "related": ".xml"
+          }
+        }
       }
     }
   },
@@ -47,11 +60,29 @@
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
+    },
+    "xunit.assert/2.7.0": {
+      "sha512": "CCTs3bUhmIS4tDwK6Cn/IiabG3RhYzdf65eIkO7u9/grKoN9MrN780LzVED3E8v+vwmmj7b5TW3/GFuZHPAzWA==",
+      "type": "package",
+      "path": "xunit.assert/2.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "_content/README.md",
+        "_content/logo-128-transparent.png",
+        "lib/net6.0/xunit.assert.dll",
+        "lib/net6.0/xunit.assert.xml",
+        "lib/netstandard1.1/xunit.assert.dll",
+        "lib/netstandard1.1/xunit.assert.xml",
+        "xunit.assert.2.7.0.nupkg.sha512",
+        "xunit.assert.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Newtonsoft.Json >= 13.0.3"
+      "Newtonsoft.Json >= 13.0.3",
+      "xunit.assert >= 2.7.0"
     ]
   },
   "packageFolders": {
@@ -96,6 +127,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "xunit.assert": {
+            "target": "Package",
+            "version": "[2.7.0, )"
           }
         },
         "imports": [
