@@ -78,15 +78,8 @@ To use the program:
 You can configura the connection in App.config located in Alfa4/bin/Debug/net6.0
 Here is deafult config:
 
-##
-<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-	<peerSettings>
-		<peerId>PlantationOwner</peerId>
-		<discoveryPort>9876</discoveryPort>
-		<discoveryIntervalSeconds>5</discoveryIntervalSeconds>
-	</peerSettings>
-</configuration>
+
+![image](https://github.com/Crusader5033/Alfa4/assets/113086006/8300b9da-bf60-48d4-8d2b-605721468708)
 
    
 ## Issues
