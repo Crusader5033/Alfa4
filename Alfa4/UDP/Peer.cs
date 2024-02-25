@@ -60,39 +60,50 @@ internal class Peer
         try
         {
             NetworkStream stream = tcpClient.GetStream();
-            StringBuilder messageBuilder = new StringBuilder();
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                messageBuilder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
-            }
-            string message = messageBuilder.ToString().Trim();
-            Console.WriteLine($"Received TCP message: {message}");
 
-            // Parse the incoming TCP message
-            var parsedMessage = ParseJsonMessage(message);
-            if (parsedMessage.ContainsKey("status") && parsedMessage["status"].ToString() == "ok")
+            // Set a timeout for reading from the stream
+            stream.ReadTimeout = 5000; // 5 seconds
+
+            // Check if data is available before reading
+            if (stream.DataAvailable)
             {
-                if (parsedMessage.ContainsKey("messages"))
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Console.WriteLine($"Received TCP message: {message}");
+
+                // Parse the incoming TCP message
+                var parsedMessage = ParseJsonMessage(message);
+                if (parsedMessage.ContainsKey("status") && parsedMessage["status"].ToString() == "ok")
                 {
-                    var messages = parsedMessage["messages"] as Dictionary<string, object>;
-                    foreach (var kvp in messages)
+                    if (parsedMessage.ContainsKey("messages"))
                     {
-                        string messageId = kvp.Key;
-                        var messageData = kvp.Value as Dictionary<string, object>;
-                        string peerId = messageData["peer_id"].ToString();
-                        string msg = messageData["message"].ToString();
-
-                        // Store message in history
-                        if (!messageHistory.ContainsKey(peerId))
+                        var messages = parsedMessage["messages"] as Dictionary<string, object>;
+                        foreach (var kvp in messages)
                         {
-                            messageHistory[peerId] = new Dictionary<string, string>();
+                            string messageId = kvp.Key;
+                            var messageData = kvp.Value as Dictionary<string, object>;
+                            string peerId = messageData["peer_id"].ToString();
+                            string msg = messageData["message"].ToString();
+
+                            // Store message in history
+                            if (!messageHistory.ContainsKey(peerId))
+                            {
+                                messageHistory[peerId] = new Dictionary<string, string>();
+                            }
+                            messageHistory[peerId][messageId] = msg;
                         }
-                        messageHistory[peerId][messageId] = msg;
                     }
                 }
             }
+            else
+            {
+                Console.WriteLine("No data available to read from the stream.");
+            }
+        }
+        catch (TimeoutException ex)
+        {
+            Console.WriteLine("Timeout occurred while reading from the stream: " + ex.Message);
         }
         catch (Exception ex)
         {
