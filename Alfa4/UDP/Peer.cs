@@ -104,6 +104,7 @@ internal class Peer
         catch (TimeoutException ex)
         {
             Console.WriteLine("Timeout occurred while reading from the stream: " + ex.Message);
+            // Continue to the next iteration or take appropriate action
         }
         catch (Exception ex)
         {
