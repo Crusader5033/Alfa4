@@ -85,7 +85,6 @@ internal class Peer
                     }
                 }
             }
-            
         }
         catch (Exception ex)
         {
@@ -156,6 +155,11 @@ internal class Peer
 
             // Send hello message
             tcpConnection.SendMessage($"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}");
+
+            // Prepare and send peer's chat history
+            string historyResponse = PrepareHistoryResponse();
+            tcpConnection.SendMessage(historyResponse);
+
             Console.WriteLine($"TCP connection established with peer at {remoteEP.Address}:{tcpConnection.Port}");
         }
     }
