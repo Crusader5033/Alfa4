@@ -1,5 +1,7 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 internal class TcpConnection
 {
@@ -7,6 +9,8 @@ internal class TcpConnection
     private NetworkStream stream;
     private string ipAddress;
     private int port;
+    private bool isConnected = false;
+    private Thread receiveThread;
 
     public TcpConnection(string ipAddress, int port)
     {
@@ -21,6 +25,11 @@ internal class TcpConnection
         {
             tcpClient.Connect(ipAddress, port);
             stream = tcpClient.GetStream();
+            isConnected = true;
+
+            // Spuštění vlákna pro příjem zpráv
+            receiveThread = new Thread(ReceiveMessages);
+            receiveThread.Start();
         }
         catch (Exception ex)
         {
@@ -46,12 +55,36 @@ internal class TcpConnection
     {
         try
         {
+            // Zastavení vlákna pro příjem zpráv
+            receiveThread?.Abort();
             stream.Close();
             tcpClient.Close();
+            isConnected = false;
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error occurred while disconnecting TCP connection: " + ex.Message);
+        }
+    }
+
+    private void ReceiveMessages()
+    {
+        while (isConnected)
+        {
+            try
+            {
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                string receivedMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Console.WriteLine($"Received TCP message: {receivedMessage}");
+                // Zde můžete provádět další zpracování přijatých zpráv
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occurred while receiving TCP message: " + ex.Message);
+                // Ukončení vlákna při chybě
+                isConnected = false;
+            }
         }
     }
 }

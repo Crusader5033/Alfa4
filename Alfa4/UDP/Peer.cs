@@ -115,19 +115,9 @@ internal class Peer
     private void HandleDiscoveryResponse(string message, IPEndPoint remoteEP)
     {
         Console.WriteLine($"Received response from {remoteEP}: {message}");
-
-        // Parse the response message
-        var response = ParseJsonMessage(message);
-        if (response.ContainsKey("messages"))
-        {
-            // Extract messages from response
-            var messages = response["messages"] as Dictionary<string, object>;
-            // Handle handshake
-            HandleHandshake(messages, remoteEP);
-        }
     }
 
-    private void HandleHandshake(Dictionary<string, object> messages, IPEndPoint remoteEP)
+    public void HandleHandshake(Dictionary<string, object> messages, IPEndPoint remoteEP)
     {
         if (!tcpConnections.ContainsKey(remoteEP.Address.ToString()))
         {
@@ -139,24 +129,50 @@ internal class Peer
             // Send handshake message
             tcpConnection.SendMessage($"{{\"command\":\"hello\",\"peer_id\":\"{peerId}\"}}");
 
-            // Send peer's chat history
-            tcpConnection.SendMessage(GetMessageHistory());
+            // Prepare and send peer's chat history
+            string historyResponse = PrepareHistoryResponse(messages);
+            tcpConnection.SendMessage(historyResponse);
         }
     }
 
-    private string GetMessageHistory()
+    public string PrepareHistoryResponse(Dictionary<string, object> receivedMessages)
     {
-        // Here you would construct your chat history message
-        // For now, let's just return a dummy message
-        return "{\"status\":\"ok\",\"messages\":{\"1707243010934\":{\"peer_id\":\"molic-peer3\",\"message\":\"pokus\"}}}";
+        // Construct history response message
+        StringBuilder historyBuilder = new StringBuilder();
+        historyBuilder.Append("{\"status\":\"ok\",\"messages\":{");
+
+        // Add messages sent by this peer
+        // For demonstration purposes, let's assume we have a list of sent messages
+        List<string> sentMessages = new List<string>() { "First message", "Second message", "Third message" };
+        foreach (var sentMessage in sentMessages)
+        {
+            string messageId = GenerateMessageId(); // You should implement this method to generate a unique message ID
+            historyBuilder.Append($"\"{messageId}\":{{\"peer_id\":\"{peerId}\",\"message\":\"{sentMessage}\"}},");
+        }
+
+        // Add received messages from other peers
+        foreach (var receivedMessage in receivedMessages)
+        {
+            historyBuilder.Append($"\"{receivedMessage.Key}\":{{\"peer_id\":\"{receivedMessage.Value}\",\"message\":\"{receivedMessage.Key}\"}},");
+        }
+
+        // Remove the last comma
+        historyBuilder.Remove(historyBuilder.Length - 1, 1);
+
+        // Close the messages object
+        historyBuilder.Append("}}");
+
+        return historyBuilder.ToString();
     }
 
-    private Dictionary<string, object> ParseJsonMessage(string message)
+    private string GenerateMessageId()
     {
-        // Here you would parse the JSON message into a dictionary
-        // For now, let's just return an empty dictionary
-        return new Dictionary<string, object>();
+        DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        TimeSpan timeSinceEpoch = DateTime.UtcNow - epochStart;
+        long milliseconds = (long)timeSinceEpoch.TotalMilliseconds;
+        return milliseconds.ToString();
     }
+
 
     public void Stop()
     {
