@@ -57,9 +57,14 @@ internal class Peer
         try
         {
             NetworkStream stream = tcpClient.GetStream();
+            StringBuilder messageBuilder = new StringBuilder();
             byte[] buffer = new byte[1024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            int bytesRead;
+            while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                messageBuilder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+            }
+            string message = messageBuilder.ToString().Trim();
             Console.WriteLine($"Received TCP message: {message}");
 
             // Parse the incoming TCP message
@@ -95,6 +100,7 @@ internal class Peer
             tcpClient.Close();
         }
     }
+
 
     public void StartListening()
     {
